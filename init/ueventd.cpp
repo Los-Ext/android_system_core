@@ -272,7 +272,8 @@ static UeventdConfiguration GetConfiguration() {
     if (android::base::GetIntProperty("ro.product.first_api_level", 10000) <= __ANDROID_API_S__) {
         auto hardware = android::base::GetProperty("ro.hardware", "");
         return ParseConfig({"/system/etc/ueventd.rc", "/vendor/ueventd.rc", "/odm/ueventd.rc",
-                            "/ueventd." + hardware + ".rc"});
+                            "/ueventd." + hardware + ".rc", "/vendor/etc/ueventd." + hardware + ".rc",
+                            "/vendor/etc/ueventd.rc", "/odm/etc/ueventd.rc"});
     }
 
     return ParseConfig({"/system/etc/ueventd.rc"});
