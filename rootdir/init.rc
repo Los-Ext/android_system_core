@@ -1081,8 +1081,23 @@ on post-fs-data
 on zygote-start
     wait_for_prop odsign.verification.done 1
     # A/B update verifier that marks a successful boot.
-    exec_start update_verifier
-    start statsd
+    exec_start update_verifier_nonencrypted
+    start netd
+    start zygote
+    start zygote_secondary
+
+on zygote-start && property:ro.crypto.state=unsupported
+    wait_for_prop odsign.verification.done 1
+    # A/B update verifier that marks a successful boot.
+    exec_start update_verifier_nonencrypted
+    start netd
+    start zygote
+    start zygote_secondary
+
+on zygote-start && property:ro.crypto.state=encrypted && property:ro.crypto.type=file
+    wait_for_prop odsign.verification.done 1
+    # A/B update verifier that marks a successful boot.
+    exec_start update_verifier_nonencrypted
     start netd
     start zygote
     start zygote_secondary
