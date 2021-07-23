@@ -1082,7 +1082,6 @@ on boot
     # are not aware of using fsync()/sync() to prepare sudden power-cut.
     write /dev/sys/fs/by-name/userdata/cp_interval 200
     write /dev/sys/fs/by-name/userdata/gc_urgent_sleep_time 50
-    write /dev/sys/fs/by-name/userdata/iostat_enable 1
 
     # limit discard size to 128MB in order to avoid long IO latency
     # for filesystem tuning first (dm or sda)
