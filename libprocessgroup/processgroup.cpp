@@ -440,7 +440,7 @@ bool sendSignalToProcessGroup(uid_t uid, pid_t initialPid, int signal) {
             // Erase all pids that will be killed when we kill the process groups.
             for (auto it = pids.begin(); it != pids.end();) {
                 pid_t pgid = getpgid(*it);
-                if (pgids.count(pgid) == 1) {
+                if (pgids.count(pgid) == 0) {
                     it = pids.erase(it);
                 } else {
                     ++it;
