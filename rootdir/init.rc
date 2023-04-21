@@ -387,6 +387,7 @@ on init
     mkdir /dev/cpuset/audio-app
     copy /dev/cpuset/cpus /dev/cpuset/audio-app/cpus
     copy /dev/cpuset/mems /dev/cpuset/audio-app/mems
+    write /dev/cpuset/audio-app/cpus 0-3
 
     # change permissions for all cpusets we'll touch at runtime
     chown system system /dev/cpuset
@@ -412,6 +413,7 @@ on init
     chown system system /dev/cpuset/top-app/cgroup.procs
     chown system system /dev/cpuset/restricted/cgroup.procs
     chown system system /dev/cpuset/camera-daemon/cgroup.procs
+    chown system system /dev/cpuset/audio-app/cgroup.procs
 
     # set system-background to 0775 so SurfaceFlinger can touch it
     chmod 0775 /dev/cpuset/system-background
@@ -431,6 +433,7 @@ on init
     chmod 0664 /dev/cpuset/restricted/cgroup.procs
     chmod 0664 /dev/cpuset/cgroup.procs
     chmod 0664 /dev/cpuset/camera-daemon/cgroup.procs
+    chmod 0664 /dev/cpuset/audio-app/cgroup.procs
 
     # make the PSI monitor accessible to others
     chown system system /proc/pressure/memory
