@@ -239,6 +239,7 @@ cc_defaults {
     defaults: [
         "init_defaults",
         "selinux_policy_version",
+        "spoof_first_api_level_32_defaults",
     ],
     srcs: init_common_sources + init_device_sources,
     export_include_dirs: ["."],

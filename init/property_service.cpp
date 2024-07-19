@@ -1447,6 +1447,9 @@ static void SetSafetyNetProps() {
     InitPropertySet("vendor.boot.vbmeta.device_state", "locked");
     InitPropertySet("vendor.boot.verifiedbootstate", "green");
     InitPropertySet("oplusboot.verifiedbootstate", "green");
+#ifdef SPOOF_FIRST_API_LEVEL_32
+    InitPropertySet("ro.product.first_api_level", "32");
+#endif
 }
 
 void PropertyInit() {
