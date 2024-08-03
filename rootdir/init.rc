@@ -258,8 +258,8 @@ on init
     write /dev/blkio/background/blkio.group_idle 0
     write /dev/blkio/background/blkio.prio.class restrict-to-be
 
-    # Setup cpu.shares to throttle background groups (bg ~ 5% sysbg ~ 5% dex2oat ~2.5%)
-    write /dev/cpuctl/background/cpu.shares 1024
+    # Setup cpu.shares to throttle background groups (bg ~ 2.5% sysbg ~ 5% dex2oat ~2.5%)
+    write /dev/cpuctl/background/cpu.shares 512
     write /dev/cpuctl/system-background/cpu.shares 1024
     write /dev/cpuctl/dex2oat/cpu.shares 512
     write /dev/cpuctl/system/cpu.shares 20480
