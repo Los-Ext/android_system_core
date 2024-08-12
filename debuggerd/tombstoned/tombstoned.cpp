@@ -153,7 +153,7 @@ class CrashQueue {
       PLOG(ERROR) << "Failed to make tombstone world-readable";
     }
 
-    return std::move(result);
+    return result;
   }
 
   std::optional<CrashOutput> get_output(DebuggerdDumpType dump_type) {
