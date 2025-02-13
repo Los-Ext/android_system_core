@@ -565,7 +565,7 @@
           "Params":
           {
             "Controller": "cpuset",
-            "Path": "system-background"
+            "Path": "top-app"
           }
         }
       ]
@@ -578,7 +578,7 @@
           "Params":
           {
             "Controller": "cpuset",
-            "Path": "system-background"
+            "Path": "top-app"
           }
         }
       ]
