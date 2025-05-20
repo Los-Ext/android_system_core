@@ -861,6 +861,18 @@ static void update_sys_usb_config() {
     }
 }
 
+static void setDebuggingOverrides() {
+    bool debuggingEnabled = android::base::GetBoolProperty("ro.sys.axion_userdebug_enabled", false);
+    if (!debuggingEnabled) return;
+    std::string error;
+    PropertySetNoSocket("service.adb.root", "1", &error);
+    PropertySetNoSocket("ro.adb.secure", "0", &error);
+    PropertySetNoSocket("ro.debuggable", "1", &error);
+    PropertySetNoSocket("ro.force.debuggable", "1", &error);
+    PropertySetNoSocket("persist.sys.usb.config", "adb", &error);
+    PropertySetNoSocket("sys.usb.config", "adb", &error);
+}
+
 static void load_override_properties() {
     if (ALLOW_LOCAL_PROP_OVERRIDE) {
         std::map<std::string, std::string> properties;
@@ -1261,6 +1273,8 @@ void PropertyLoadBootDefaults() {
     weaken_prop_override_security = false;
 
     update_sys_usb_config();
+    
+    setDebuggingOverrides();
 }
 
 void PropertyLoadDerivedDefaults() {
