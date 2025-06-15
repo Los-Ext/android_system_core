@@ -1399,7 +1399,7 @@ on property:sys.snapshotctl.unmap=requested
     exec - root root system -- /system/bin/snapshotctl unmap
     setprop sys.snapshotctl.unmap "finished"
   
-on property:persist.sys.is_upgrade=1
+on property:sys.boot_completed=1 && property:persist.sys.is_upgrade=1
   exec - system system -- /bin/rm -rf /data/system/package_cache
   exec - system system -- /bin/rm -rf /data/resource-cache
   
