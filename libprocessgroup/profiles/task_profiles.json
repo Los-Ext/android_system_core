@@ -26,6 +26,11 @@
       "File": "display/cpus"
     },
     {
+      "Name": "Dex2oatCapacityCPUs",
+      "Controller": "cpuset",
+      "File": "dex2oat/cpus"
+    },
+    {
       "Name": "MaxCapacityCPUs",
       "Controller": "cpuset",
       "File": "top-app/cpus"
@@ -537,6 +542,19 @@
           {
             "Controller": "cpuset",
             "Path": "display"
+          }
+        }
+      ]
+    },
+    {
+      "Name": "Dex2oatCapacity",
+      "Actions" : [
+        {
+          "Name" : "JoinCgroup",
+          "Params" :
+          {
+            "Controller": "cpuset",
+            "Path": "dex2oat"
           }
         }
       ]

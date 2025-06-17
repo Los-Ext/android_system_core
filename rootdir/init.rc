@@ -433,6 +433,14 @@ on init
     write /dev/cpuctl/display/cpu.uclamp.latency_sensitive 1
     write /dev/cpuctl/display/cpu.shares 20480
 
+    # dex2oat
+    mkdir /dev/cpuset/dex2oat
+    copy /dev/cpuset/cpus /dev/cpuset/dex2oat/cpus
+    copy /dev/cpuset/mems /dev/cpuset/dex2oat/mems
+    chown system system /dev/cpuset/dex2oat
+    chown system system /dev/cpuset/dex2oat/tasks
+    chmod 0775 /dev/cpuset/dex2oat/tasks
+
     # change permissions for all cpusets we'll touch at runtime
     chown system system /dev/cpuset
     chown system system /dev/cpuset/foreground
