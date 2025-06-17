@@ -440,6 +440,24 @@ on init
     chown system system /dev/cpuset/dex2oat
     chown system system /dev/cpuset/dex2oat/tasks
     chmod 0775 /dev/cpuset/dex2oat/tasks
+    
+    # systemserver
+    mkdir /dev/cpuset/systemserver
+    copy /dev/cpuset/cpus /dev/cpuset/systemserver/cpus
+    copy /dev/cpuset/mems /dev/cpuset/systemserver/mems
+    chown system system /dev/cpuset/systemserver
+    chown system system /dev/cpuset/systemserver/tasks
+    chmod 0775 /dev/cpuset/systemserver/tasks
+
+    mkdir /dev/cpuctl/systemserver
+    chown system system /dev/cpuctl/systemserver
+    chown system system /dev/cpuctl/systemserver/tasks
+    chown system system /dev/cpuctl/systemserver/cgroup.procs
+    chmod 0664 /dev/cpuctl/systemserver/tasks
+    chmod 0664 /dev/cpuctl/systemserver/cgroup.procs
+    write /dev/cpuctl/systemserver/cpu.uclamp.min 1
+    write /dev/cpuctl/systemserver/cpu.uclamp.latency_sensitive 1
+    write /dev/cpuctl/systemserver/cpu.shares 20480
 
     # change permissions for all cpusets we'll touch at runtime
     chown system system /dev/cpuset
@@ -1454,6 +1472,7 @@ on property:sys.boot_completed=1
     write /dev/cpuset/background/cpus ${persist.sys.axion_cpu_bg:-0-2}
     write /dev/cpuset/audio-app/cpus ${persist.sys.axion_cpu_limit_ui:-0-2}
     write /dev/cpuset/display/cpus ${persist.sys.axion_cpu_big:-4-7}
+    write /dev/cpuset/systemserver/cpus ${persist.sys.axion_cpu_unlimit_ui:-0-7}
 
 on property:sys.boot_completed=1 && property:persist.sys.is_upgrade=1
   exec - system system -- /bin/rm -rf /data/system/package_cache

@@ -31,6 +31,11 @@
       "File": "dex2oat/cpus"
     },
     {
+      "Name": "SystemServerCapacityCPUs",
+      "Controller": "cpuset",
+      "File": "systemserver/cpus"
+    },
+    {
       "Name": "MaxCapacityCPUs",
       "Controller": "cpuset",
       "File": "top-app/cpus"
@@ -296,6 +301,19 @@
       ]
     },
     {
+      "Name": "SystemServerPerformance",
+      "Actions": [
+        {
+          "Name": "JoinCgroup",
+          "Params":
+          {
+            "Controller": "cpu",
+            "Path": "systemserver"
+          }
+        }
+      ]
+    },
+    {
       "Name": "CpuPolicySpread",
       "Actions": [
         {
@@ -542,6 +560,19 @@
           {
             "Controller": "cpuset",
             "Path": "display"
+          }
+        }
+      ]
+    },
+    {
+      "Name": "SystemServerCapacity",
+      "Actions" : [
+        {
+          "Name" : "JoinCgroup",
+          "Params" :
+          {
+            "Controller": "cpuset",
+            "Path": "systemserver"
           }
         }
       ]
