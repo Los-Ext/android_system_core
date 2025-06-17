@@ -21,6 +21,11 @@
       "File": "audio-app/cpus"
     },
     {
+      "Name": "DisplayCapacityCPUs",
+      "Controller": "cpuset",
+      "File": "display/cpus"
+    },
+    {
       "Name": "MaxCapacityCPUs",
       "Controller": "cpuset",
       "File": "top-app/cpus"
@@ -242,6 +247,19 @@
           {
             "Controller": "cpu",
             "Path": "audio-app"
+          }
+        }
+      ]
+    },
+    {
+      "Name": "DisplayPerformance",
+      "Actions" : [
+        {
+          "Name" : "JoinCgroup",
+          "Params" :
+          {
+            "Controller": "cpu",
+            "Path": "display"
           }
         }
       ]
@@ -506,6 +524,19 @@
           {
             "Controller": "cpuset",
             "Path": "audio-app"
+          }
+        }
+      ]
+    },
+    {
+      "Name": "DisplayCapacity",
+      "Actions" : [
+        {
+          "Name" : "JoinCgroup",
+          "Params" :
+          {
+            "Controller": "cpuset",
+            "Path": "display"
           }
         }
       ]
