@@ -269,7 +269,7 @@
           "Params" :
           {
             "Controller": "cpu",
-            "Path": "display"
+            "Path": "top-app"
           }
         }
       ]
@@ -308,7 +308,7 @@
           "Params":
           {
             "Controller": "cpu",
-            "Path": "systemserver"
+            "Path": "top-app"
           }
         }
       ]
