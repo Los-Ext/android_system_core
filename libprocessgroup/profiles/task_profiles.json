@@ -256,7 +256,7 @@
           "Params" :
           {
             "Controller": "cpu",
-            "Path": "audio-app"
+            "Path": "foreground"
           }
         }
       ]
