@@ -191,6 +191,10 @@ static int get_sched_policy_from_group(const std::string& group, SchedPolicy* po
         *policy = SP_FOREGROUND_WINDOW;
     } else if (group == "audio-app") {
         *policy = SP_FOREGROUND;
+    } else if (group == "display") {
+        *policy = SP_TOP_APP;
+    } else if (group == "systemserver") {
+        *policy = SP_TOP_APP;
     } else {
         errno = ERANGE;
         return -1;
