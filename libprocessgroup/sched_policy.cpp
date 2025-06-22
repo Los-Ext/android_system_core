@@ -190,7 +190,7 @@ static int get_sched_policy_from_group(const std::string& group, SchedPolicy* po
     } else if (group == "foreground_window") {
         *policy = SP_FOREGROUND_WINDOW;
     } else if (group == "audio-app") {
-        *policy = SP_AUDIO_APP;
+        *policy = SP_FOREGROUND;
     } else {
         errno = ERANGE;
         return -1;
@@ -268,7 +268,7 @@ const char* get_cpuset_policy_profile_name(SchedPolicy policy) {
      */
     static constexpr const char* kCpusetProfiles[SP_CNT + 1] = {
             "CPUSET_SP_DEFAULT",      "CPUSET_SP_BACKGROUND", "CPUSET_SP_FOREGROUND",
-            "CPUSET_SP_SYSTEM",       "SP_AUDIO_APP", "SP_AUDIO_SYS",
+            "CPUSET_SP_SYSTEM",       "CPUSET_SP_FOREGROUND", "CPUSET_SP_FOREGROUND",
             "CPUSET_SP_TOP_APP",      "CPUSET_SP_DEFAULT",    "CPUSET_SP_RESTRICTED",
             "CPUSET_SP_FOREGROUND_WINDOW"};
     if (policy < SP_DEFAULT || policy >= SP_CNT) {
@@ -289,7 +289,7 @@ const char* get_sched_policy_profile_name(SchedPolicy policy) {
      */
     static constexpr const char* kSchedProfiles[SP_CNT + 1] = {
             "SCHED_SP_DEFAULT",      "SCHED_SP_BACKGROUND", "SCHED_SP_FOREGROUND",
-            "SCHED_SP_SYSTEM",       "SP_AUDIO_APP", "SP_AUDIO_SYS",
+            "SCHED_SP_SYSTEM",       "SCHED_SP_FOREGROUND", "SCHED_SP_FOREGROUND",
             "SCHED_SP_TOP_APP",      "SCHED_SP_RT_APP",     "SCHED_SP_DEFAULT",
             "SCHED_SP_FOREGROUND_WINDOW"};
     if (policy < SP_DEFAULT || policy >= SP_CNT) {
