@@ -116,7 +116,6 @@ static bool persistent_properties_loaded = false;
 static int from_init_socket = -1;
 static int init_socket = -1;
 static bool accept_messages = false;
-static bool weaken_prop_security = false;
 static std::mutex accept_messages_lock;
 static std::mutex selinux_check_access_lock;
 static std::thread property_service_thread;
@@ -406,7 +405,7 @@ static std::optional<uint32_t> PropertySet(const std::string& name, const std::s
         prop_info* pi = (prop_info*)__system_property_find(name.c_str());
         if (pi != nullptr) {
             // ro.* properties are actually "write-once".
-            if (StartsWith(name, "ro.") && !weaken_prop_security) {
+            if (StartsWith(name, "ro.")) {
                 *error = "Read-only property was already set";
                 return {PROP_ERROR_READ_ONLY_PROPERTY};
             }
@@ -1391,7 +1390,6 @@ static void ProcessKernelDt() {
 }
 
 constexpr auto ANDROIDBOOT_PREFIX = "androidboot."sv;
-constexpr auto ANDROIDBOOT_MODE = "androidboot.mode"sv;
 
 static void ProcessKernelCmdline() {
     android::fs_mgr::ImportKernelCmdline([&](const std::string& key, const std::string& value) {
@@ -1408,32 +1406,6 @@ static void ProcessBootconfig() {
             InitPropertySet("ro.boot." + key.substr(ANDROIDBOOT_PREFIX.size()), value);
         }
     });
-}
-
-static void SetSafetyNetProps() {
-    std::string error;
-    std::string build_type = android::base::GetProperty("ro.build.type", "");
-
-    if (build_type == "user") {
-        // Disable prop security
-        weaken_prop_security = true;
-
-        // Array of property-value pairs to set
-        std::vector<std::pair<std::string, std::string>> properties = {
-            {"ro.boot.flash.locked", "1"},
-            {"ro.boot.verifiedbootstate", "green"},
-            {"ro.boot.veritymode", "enforcing"},
-            {"ro.boot.vbmeta.device_state", "locked"}
-        };
-
-        // Iterate through the vector and set properties
-        for (const auto& prop : properties) {
-            PropertySetNoSocket(prop.first, prop.second, &error);
-        }
-
-        // Restore prop security
-        weaken_prop_security = false;
-    }
 }
 
 void PropertyInit() {
@@ -1462,13 +1434,6 @@ void PropertyInit() {
 
     PropertyLoadBootDefaults();
     PropertyLoadDerivedDefaults();
-
-    // Report a valid verified boot chain to make Google SafetyNet integrity
-    // checks pass. This will disable the read only props protection while
-    // being set
-    if (!IsRecoveryMode()) {
-      SetSafetyNetProps();
-    }
 }
 
 static void HandleInitSocket() {
