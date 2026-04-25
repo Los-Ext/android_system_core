@@ -23,6 +23,7 @@
 #include <inttypes.h>
 #include <limits.h>
 #include <netinet/in.h>
+#include <sstream>
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -504,6 +505,8 @@ bool CheckControlPropertyPerms(const std::string& name, const std::string& value
 
 static bool is_exempt(const std::string& name, const std::string& source_context) {
     static const std::vector<std::string> exemption_list = {
+        "persist.sys.",
+        "logpersistd",
         "ro.boot.vbmeta.",
     };
 
@@ -872,6 +875,10 @@ static void LoadPropertiesFromSecondStageRes(std::map<std::string, std::string>*
 // on runtime.
 static void update_sys_usb_config() {
     // emulators don't have USB, they enable adb another way.
+    const char* DEBUG_PROP = "persist.sys.ext_debug_enabled";
+    std::string debug_value = GetProperty(DEBUG_PROP, "0");
+    bool debug_enabled = debug_value == "1";
+
     const bool add_adb_func = android::base::GetBoolProperty("ro.adb.secure", false) &&
                               android::base::GetBoolProperty("ro.adb.has_usb", true);
 
@@ -879,8 +886,9 @@ static void update_sys_usb_config() {
     // b/150130503, add (config == "none") condition here to prevent appending
     // ",adb" if "none" is explicitly defined in default prop.
     if (config.empty() || config == "none") {
-        InitPropertySet("persist.sys.usb.config", add_adb_func ? "adb" : "none");
-    } else if (add_adb_func && config.find("adb") == std::string::npos &&
+        InitPropertySet("persist.sys.usb.config",
+                        (add_adb_func || debug_enabled) ? "adb" : "none");
+    } else if ((add_adb_func || debug_enabled) && config.find("adb") == std::string::npos &&
                config.length() + 4 < PROP_VALUE_MAX) {
         config.append(",adb");
         InitPropertySet("persist.sys.usb.config", config);
@@ -1222,6 +1230,7 @@ static void SetSafetyNetProps() {
         {"ro.build.tags", "release-keys"},
         {"ro.system.build.tags", "release-keys"},
         {"ro.product.build.type", "user"},
+        {"ro.system_dlkm.build.type", "user"},
         {"ro.odm.build.type", "user"},
         {"ro.system.build.type", "user"},
         {"ro.system_ext.build.type", "user"},
@@ -1284,7 +1293,7 @@ void LoadVbMetaOverrides() {
         if (res == PROP_SUCCESS) {
             LOG(INFO) << "GetVbmetaSize: Property 'ro.boot.vbmeta.size' set successfully to '" << vbmeta_size << "'";
         } else {
-            LOG(ERROR) << "GetVbmetaSize: Failed to set property 'ro.boot.vbmeta.size' to '" << vbmeta_size 
+            LOG(ERROR) << "GetVbmetaSize: Failed to set property 'ro.boot.vbmeta.size' to '" << vbmeta_size
                        << "': err=" << res << " (" << error << ")";
         }
     }
@@ -1297,6 +1306,86 @@ void LoadVbMetaOverrides() {
             LOG(INFO) << "GetVbmetaDigest: Property 'ro.boot.vbmeta.digest' set successfully to dynamic fallback value '" << fallback_digest << "'";
         } else {
             LOG(ERROR) << "GetVbmetaDigest: Failed to set property 'ro.boot.vbmeta.digest' to fallback value: " << error;
+        }
+    }
+}
+
+void LoadDebugProperties() {
+    const char* DEBUG_PROP = "persist.sys.ext_debug_enabled";
+    std::string error;
+    uint32_t res;
+
+    std::string debug_value = GetProperty(DEBUG_PROP, "0");
+    bool debug_enabled = debug_value == "1";
+    LOG(INFO) << DEBUG_PROP << " = " << debug_value;
+
+    const std::pair<const char*, const char*> debug_props[] = {
+        {"service.adb.root", debug_enabled ? "1" : "0"},
+        {"ro.adb.secure", debug_enabled ? "0" : "1"},
+        {"ro.debuggable", debug_enabled ? "1" : "0"},
+        {"ro.force.debuggable", debug_enabled ? "1" : "0"}
+    };
+
+    for (const auto& [name, value] : debug_props) {
+        res = PropertySetNoSocket(name, value, &error);
+        if (res == PROP_SUCCESS) {
+            LOG(INFO) << "Debug property '" << name << "' set to '" << value << "'";
+        } else {
+            LOG(ERROR) << "Failed to set debug property '" << name
+                       << "' to '" << value << "': err=" << res << " (" << error << ")";
+        }
+    }
+}
+
+void LoadReleaseBuildProperties() {
+    std::string error;
+    uint32_t res;
+
+    const char* FLAVOR_PROP = "ro.build.flavor";
+    std::string flavor_value = GetProperty(FLAVOR_PROP, "");
+
+    if (!flavor_value.empty()) {
+        if (flavor_value.find("lineage_") == 0) {
+            flavor_value.erase(0, std::string("lineage_").length());
+        }
+
+        size_t pos = flavor_value.find("userdebug");
+        if (pos != std::string::npos) {
+            flavor_value.replace(pos, std::string("userdebug").length(), "user");
+        }
+
+        res = PropertySetNoSocket(FLAVOR_PROP, flavor_value, &error);
+        if (res == PROP_SUCCESS) {
+            LOG(INFO) << "Property '" << FLAVOR_PROP << "' set to '" << flavor_value << "'";
+        } else {
+            LOG(ERROR) << "Failed to set property '" << FLAVOR_PROP
+                       << "' to '" << flavor_value << "': err=" << res << " (" << error << ")";
+        }
+    }
+
+    const char* DISPLAY_ID_PROP = "ro.build.display.id";
+    std::string display_id = GetProperty(DISPLAY_ID_PROP, "");
+
+    if (!display_id.empty()) {
+        std::istringstream iss(display_id);
+        std::string token;
+        std::string numeric_build;
+
+        while (iss >> token) {
+            if (token.find('.') != std::string::npos && std::any_of(token.begin(), token.end(), ::isdigit)) {
+                numeric_build = token;
+                break;
+            }
+        }
+
+        if (!numeric_build.empty()) {
+            res = PropertySetNoSocket(DISPLAY_ID_PROP, numeric_build, &error);
+            if (res == PROP_SUCCESS) {
+                LOG(INFO) << "Property '" << DISPLAY_ID_PROP << "' set to '" << numeric_build << "'";
+            } else {
+                LOG(ERROR) << "Failed to set property '" << DISPLAY_ID_PROP
+                           << "' to '" << numeric_build << "': err=" << res << " (" << error << ")";
+            }
         }
     }
 }
@@ -1416,7 +1505,7 @@ void PropertyLoadBootDefaults() {
       }
     }
 
-    LoadVbMetaOverrides();
+    LoadReleaseBuildProperties();
 
     // Restore the normal property override security after init extension is executed
     weaken_prop_override_security = false;
@@ -1638,6 +1727,13 @@ static void HandleInitSocket() {
                 // Always enable usb adb if device is booted with debug ramdisk.
                 update_sys_usb_config();
             }
+            weaken_prop_override_security = true;
+
+            LoadDebugProperties();
+            LoadVbMetaOverrides();
+
+            weaken_prop_override_security = false;
+
             InitPropertySet("ro.persistent_properties.ready", "true");
             persistent_properties_loaded = true;
             break;
