@@ -19,7 +19,6 @@
 
 #include <memory>
 #include <optional>
-#include <unordered_set>
 
 #include <android-base/result.h>
 #include <batteryservice/BatteryService.h>
@@ -97,12 +96,9 @@ class BatteryMonitor {
     static void logValues(const android::hardware::health::V2_1::HealthInfo& health_info,
                           const struct healthd_config& healthd_config);
 
-    void updateChargerPresence(const char* const device_name,
-                               std::optional<PowerSupplyType> ty = std::nullopt);
-
   private:
     struct healthd_config *mHealthdConfig;
-    std::unordered_set<std::string> mChargerNames;
+    Vector<String8> mChargerNames;
     bool mBatteryDevicePresent;
     int mBatteryFixedCapacity;
     int mBatteryFixedTemperature;
@@ -113,8 +109,6 @@ class BatteryMonitor {
             mLastGoodBatteryLevel;
 
     static constexpr std::chrono::seconds kMaximumLevelStaleness = std::chrono::seconds(70);
-
-    void initWithBatteryDevice(const char* const name);
 };
 
 }; // namespace android
